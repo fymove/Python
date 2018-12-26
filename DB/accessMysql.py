@@ -1,7 +1,7 @@
 import pymysql
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+#import numpy as np
+#import pandas as pd
+#import matplotlib.pyplot as plt
 
 
 
@@ -14,21 +14,24 @@ con = pymysql.connect(host="120.78.162.110", port=18330, user="queryUser", \
 cursor = con.cursor()
 
 # 执行sql语句，并返回影响的行数
-rownum = cursor.execute("SELECT command_content FROM bd.command_log where dtu_id = 'X18040563'\
-and command_content like '%\"3\":%' order by create_date desc limit 3")
-#alldata = cursor.fetchall()
-onedata = cursor.fetchone()
-print(onedata[0])
-print(type(onedata[0]))
-dic = dict(eval(onedata))
+DTU_ID = 'X18040566'
+KEY = "3"
 
-#print(dic.get("3"))
-print(onedata)
 
-"""
+def get_signal(db_cursor, dtu_id, key):
+    sql = "SELECT command_content FROM bd.command_log where dtu_id = \'{0}\'\
+and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(DTU_ID, KEY)
+#    print(sql)
+    rownum = db_cursor.execute(sql)
+    line = db_cursor.fetchone()
+    dic = eval(line[0])
+    print(dic)
+    signal_val = dic.get(key)
+    return int(signal_val)
 
-print("总行数为：{}".format(rownum))
-for data in alldata:
-    print(data)
-"""
+
+if __name__ == "__main__":
+    signal = get_signal(cursor, DTU_ID, KEY)
+    print("dtu_id:{0} signal:{1}".format(DTU_ID, signal))
+
 
