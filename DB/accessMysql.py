@@ -18,7 +18,7 @@ DTU_ID = 'X18040566'
 KEY = "3"
 
 
-def get_signal(db_cursor, dtu_id, key):
+def get_key_val(db_cursor, dtu_id, key):
     sql = "SELECT command_content FROM bd.command_log where dtu_id = \'{0}\'\
 and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(DTU_ID, KEY)
 #    print(sql)
@@ -31,7 +31,7 @@ and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(
 
 
 if __name__ == "__main__":
-    signal = get_signal(cursor, DTU_ID, KEY)
+    signal = get_key_val(cursor, DTU_ID, KEY)
     print("dtu_id:{0} signal:{1}".format(DTU_ID, signal))
 
 
