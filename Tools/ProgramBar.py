@@ -1,10 +1,36 @@
 import time
 
+
 __author__ = "fengyang"
 __time__ = 2018/12/26
 
 g_startime = 0
 SYMBOL_NUM = 50
+
+
+def show_head_info(name, version):
+    print()
+    print()
+    print("******************************************************************")
+    print("*                             \\\\\\|///                            *")
+    print("*                            \\\\- -  //                           *")
+    print("*                            (  @ @  )                           *")
+    print("*   +----------------------o00o-(_)-o00o---------------------+   *")
+    print("*   |                                                        |   *")
+    print("*   | Product name : {0:<40}|   *".format(name))
+    print("*   | Product Ver  : {0:<40}|   *".format(version))
+    print("*   |--------------------------------------------------------|   *")
+    print("*   | Copyright    : 2018 深圳前海星物联科技有限公司         |   *")
+    print("*   | Website      : http://www.qhxwl.com/                   |   *")
+    print("*   | author       : 冯 阳                                   |   *")
+    print("*   |                               Oooo                     |   *")
+    print("*   +---------------------- oooO---(   )---------------------+   *")
+    print("*                           (   )   ) /                          *")
+    print("*                            \\ (   (_/                           *")
+    print("*                             \\_)                                *")
+    print("******************************************************************")
+    print()
+    print()
 
 
 class ProgressBar (object):
@@ -22,6 +48,7 @@ class ProgressBar (object):
 
 def test():
     bar = ProgressBar(time.perf_counter())
+    show_head_info("DTU Remote Update", "V1.0")
     for i in range(13):
         time.sleep(1)
         bar.run_progressbar(i+1, 13)
@@ -29,3 +56,4 @@ def test():
 
 if __name__ == "__main__":
     test()
+
