@@ -2,8 +2,11 @@
 # !E:\\Project\\Python\\python
 import Tools.ProgramBar as Bar
 import time
+from urllib import request
 # import os
 
+UPDATE_NAME = "X-DTU_V2.09_4CC47B5A.bin"
+UPDATE_TOKEN = "107464fc-0723-47aa-b6e8-7f310ab0dc3b"
 
 def query_data():
     test_bar = Bar.ProgressBar(time.perf_counter())
@@ -14,8 +17,30 @@ def query_data():
     print("query done")
 
 
-def upgrade_dtu():
-    print("upgrade dtu")
+def upgrade_dtu(dtu_id_list):
+    url_array = list()
+    for id in dtu_id_list:
+        url = "http://bd.qhxwl.com:18443/baod/upgrade/add.shtml?token=" + UPDATE_TOKEN + "&dtu_id="\
+        + id + "&file_name=" + UPDATE_NAME + "&file_size=11111111111111&rule=01"
+        url_array.append(url)
+        print(url)
+    upgrade_bar = Bar.ProgressBar(time.perf_counter())
+    for i, url_item in enumerate(url_array):
+        #    print("url:{0}".format(url_item))
+        with request.urlopen(url_item) as f:
+            data = f.read()
+            #            print("status:", f.status, f.reason)
+            #            for k, v in f.getheaders():
+            #               print("%s:%s" %(k, v))
+            # print("DTU_ID:", id_array[i], end="  ")
+            if data.decode("utf-8").find("用户未登录或登录超时") != -1:
+                print("token 已失效！")
+                break
+            # else:
+            #     print("命令下发成功")
+        upgrade_bar.run_progressbar(i+1, len(url_array))
+        time.sleep(20)
+    print("\n{0:*^50}\n".format("upgrade done"))
 
 
 def check_upgrade_result():

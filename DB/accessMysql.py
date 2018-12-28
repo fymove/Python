@@ -6,7 +6,7 @@ import pandas as pd
 DTU_ID = 'X18040566'
 KEY_SIGNAL = "3"
 ONLINE = True
-DTU_VERSION = "DTU_V2.08"
+DTU_VERSION = "DTU_V2.02"
 
 # 创建连接
 
@@ -29,7 +29,7 @@ and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(
 
     line = db_cursor.fetchone()
     if not line:
-        print("*********dtu_id:{}".format(dtu_id))
+        print("僵尸数据！！dtu_id:{}".format(dtu_id), "\n")
         signal_val = "-1"
     else:
         dic = eval(line[0])
@@ -40,7 +40,7 @@ and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(
         except Exception as err:
             print(err)
             signal_val = "-2"
-        return int(signal_val)
+    return int(signal_val)
 
 def selet_verion_data(db_cursor, version, online=True):
 
@@ -50,7 +50,7 @@ def selet_verion_data(db_cursor, version, online=True):
     join device d on di.dtu_id=d.dtu_id where {0} dtu_softv in(\'{1}\')".format(online_check, version)
 
     rownum = db_cursor.execute(sql)
-    print(rownum)
+    print("\n数据总条数：", rownum, '\n')
     lines = db_cursor.fetchall()
     # print(lines)
     ids = [x[0] for x in lines]
@@ -73,11 +73,17 @@ def selet_verion_data(db_cursor, version, online=True):
     df.sort_values(by="signals", ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
     print(df)
-
-    df.to_excel(r"D:\3.xlsx", version)
+    out_file = ".\\\\{0}.xlsx".format(DTU_VERSION)
+    print(out_file)
+    df.to_excel(out_file, version)
     return df
 
-def send_update_cmd():
+def send_update_cmd(db_cursor, dtu_id_list):
+    for id in dtu_id_list:
+        url = "http://bd.qhxwl.com:18443/baod/upgrade/add.shtml?token=" + UPDATE_TOKEN + "&dtu_id="\
+        + sht.range(i, 1).value + "&file_name=" + UPDATE_NAME + "&file_size=11111111111111&rule=01"
+        url_array.append(url)
+
     pass
 
 
@@ -87,7 +93,6 @@ def check_update_status():
 
 if __name__ == "__main__":
     df = selet_verion_data(cursor, DTU_VERSION, ONLINE)
-    print("-----df--------", df["dtu_id"])
     send_update_cmd()
     check_update_status()
 
