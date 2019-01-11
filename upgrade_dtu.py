@@ -3,13 +3,29 @@
 import Tools.ProgramBar as Bar
 import time
 from urllib import request
+import pymysql
+import DB.accessMysql as condb
 # import os
-
+#   ---------------  config start --------------------------------
 UPDATE_NAME = "X-DTU_V2.09_4CC47B5A.bin"
 UPDATE_TOKEN = "107464fc-0723-47aa-b6e8-7f310ab0dc3b"
 
+DTU_VERSION = "DTU_V2.02"
+ONLINE = True
+
+db_config = {
+    "host": "120.78.162.110",
+    "port": "18330",
+    "user": "queryUser",
+    "passwd": "query@2017",
+    "db": "bd",
+    "charset": "utf8"
+}
+
+#  ------------------ config end --------------------------------
 def query_data():
     test_bar = Bar.ProgressBar(time.perf_counter())
+
     for i in range(3):
         time.sleep(1)
         test_bar.run_progressbar(i + 1, 3)
@@ -90,5 +106,19 @@ def show_menu():
             do_job(select_index)
 
 
-Bar.show_head_info("DTU Remote Upgrade", "V1.00")
-show_menu()
+if __name__ == "__main__":
+
+    # 1.显示程序名称及版本信息
+    Bar.show_head_info("DTU Remote Upgrade", "V1.00")
+
+    # 2. 显示用户操操作菜单
+    show_menu()
+
+    # 3. 创建连接
+    con = pymysql.connect(**db_config)
+
+    # 4. 创建游标
+    cursor = con.cursor()
+
+    # 5. select
+    condb.selet_verion_data(cursor, DTU_VERSION, ONLINE)

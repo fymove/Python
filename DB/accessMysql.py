@@ -8,15 +8,23 @@ KEY_SIGNAL = "3"
 ONLINE = True
 DTU_VERSION = "DTU_V2.02"
 
+db_config = {
+    "host": "120.78.162.110",
+    "port": "18330",
+    "user": "queryUser",
+    "passwd": "query@2017",
+    "db": "bd",
+    "charset": "utf8"
+}
 # 创建连接
 
-con = pymysql.connect(host="120.78.162.110", port=18330, user="queryUser", \
-                      passwd="query@2017", db="bd", charset="utf8")
+con = pymysql.connect(**db_config)
 
 # 创建游标
 cursor = con.cursor()
 
 # 执行sql语句，并返回影响的行数
+
 
 def get_key_val(db_cursor, dtu_id, key):
     sql = "SELECT command_content FROM bd.command_log where dtu_id = \'{0}\'\
@@ -42,26 +50,27 @@ and command_content like '%\"{1}\":%' order by create_date desc limit 1".format(
             signal_val = "-2"
     return int(signal_val)
 
-def selet_verion_data(db_cursor, version, online=True):
 
+def selet_verion_datas(db_cursor, version, key, online=True):
     online_check = "d.is_connected = 1 and " if online else ""
-
     sql = "SELECT di.dtu_id,di.dtu_softv FROM bd.device_info di\
     join device d on di.dtu_id=d.dtu_id where {0} dtu_softv in(\'{1}\')".format(online_check, version)
 
     rownum = db_cursor.execute(sql)
-    print("\n数据总条数：", rownum, '\n')
+    # print("\n数据总条数：", rownum, '\n')
     lines = db_cursor.fetchall()
     # print(lines)
     ids = [x[0] for x in lines]
+
     signal_vals = []
     # print(ids)
     for dtuid in ids:
-        signal = get_key_val(db_cursor, dtuid, KEY_SIGNAL)
+        signal = get_key_val(db_cursor, dtuid, key)
         signal_vals.append(signal)
 
     df = pd.DataFrame({"dtu_id": [x[0] for x in lines], "dtu_version": [x[1] for x in lines],\
                        "signals": signal_vals})
+
  #   print(df)
 
     # try:
@@ -72,11 +81,12 @@ def selet_verion_data(db_cursor, version, online=True):
   #  print(df.dtypes(df["signals"]))
     df.sort_values(by="signals", ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
-    print(df)
+    #rint(df)
     out_file = ".\\\\{0}.xlsx".format(DTU_VERSION)
     print(out_file)
     df.to_excel(out_file, version)
     return df
+
 
 def send_update_cmd(db_cursor, dtu_id_list):
     for id in dtu_id_list:
