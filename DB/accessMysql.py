@@ -10,7 +10,7 @@ DTU_VERSION = "DTU_V2.02"
 
 db_config = {
     "host": "120.78.162.110",
-    "port": "18330",
+    "port": 18330,
     "user": "queryUser",
     "passwd": "query@2017",
     "db": "bd",
@@ -57,7 +57,7 @@ def selet_verion_datas(db_cursor, version, key, online=True):
     join device d on di.dtu_id=d.dtu_id where {0} dtu_softv in(\'{1}\')".format(online_check, version)
 
     rownum = db_cursor.execute(sql)
-    # print("\n数据总条数：", rownum, '\n')
+    print("\n数据总条数：", rownum, '\n')
     lines = db_cursor.fetchall()
     # print(lines)
     ids = [x[0] for x in lines]
@@ -79,21 +79,20 @@ def selet_verion_datas(db_cursor, version, key, online=True):
     #     print("astype:", err)
 
   #  print(df.dtypes(df["signals"]))
+    print("\nstart to sort signals....\n")
     df.sort_values(by="signals", ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
     #rint(df)
-    out_file = ".\\\\{0}.xlsx".format(DTU_VERSION)
-    print(out_file)
+    print("\n sorted end\n")
+
+    out_file = ".\\\\{0}.xlsx".format(version)
+    print( "write to",  out_file)
     df.to_excel(out_file, version)
+
     return df
 
 
 def send_update_cmd(db_cursor, dtu_id_list):
-    for id in dtu_id_list:
-        url = "http://bd.qhxwl.com:18443/baod/upgrade/add.shtml?token=" + UPDATE_TOKEN + "&dtu_id="\
-        + sht.range(i, 1).value + "&file_name=" + UPDATE_NAME + "&file_size=11111111111111&rule=01"
-        url_array.append(url)
-
     pass
 
 
@@ -102,7 +101,7 @@ def check_update_status():
 
 
 if __name__ == "__main__":
-    df = selet_verion_data(cursor, DTU_VERSION, ONLINE)
+    df = selet_verion_datas(cursor, DTU_VERSION, ONLINE)
     send_update_cmd()
     check_update_status()
 

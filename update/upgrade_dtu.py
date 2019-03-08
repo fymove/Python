@@ -5,6 +5,7 @@ import time
 from urllib import request
 import pymysql
 import DB.accessMysql as condb
+import configparser   # 配置文件
 # import os
 #   ---------------  config start --------------------------------
 UPDATE_NAME = "X-DTU_V2.09_4CC47B5A.bin"
@@ -13,15 +14,28 @@ UPDATE_TOKEN = "107464fc-0723-47aa-b6e8-7f310ab0dc3b"
 DTU_VERSION = "DTU_V2.02"
 ONLINE = True
 
-db_config = {
-    "host": "120.78.162.110",
-    "port": "18330",
-    "user": "queryUser",
-    "passwd": "query@2017",
-    "db": "bd",
-    "charset": "utf8"
-}
+config_info = {"db_info": {}, "querry": {}}
+# db_config = {
+#     "host": "120.78.162.110",
+#     "port": 18330,
+#     "user": "queryUser",
+#     "passwd": "query@2017",
+#     "db": "bd",
+#     "charset": "utf8"
+# }
 
+
+def get_config_info(name):
+
+    cf = configparser.ConfigParser()
+    cf.read(name)
+    db_access = {k: v for k, v in cf.items("db")}
+    db_access['port'] = int(db_access['port'])
+
+    db_query = {k: v for k, v in cf.items('query')}
+
+    tup = (db_access, db_query)
+    return tup
 #  ------------------ config end --------------------------------
 def query_data():
     test_bar = Bar.ProgressBar(time.perf_counter())
@@ -67,15 +81,20 @@ def exit_process():
     print("exit_process done")
 
 
-def do_job(index):
+def do_job(index, para):
+    global cursor
+    cfg = configparser.ConfigParser()
+    cfg.read('dbcfg.ini' )
+    cfg.read
+    dbinfo = {"cursor": cursor, "dtu_version":DTU_VERSION}
     switch = {
-        1: query_data,
+        1: condb.selet_verion_datas(cursor, DTU_VERSION, ONLINE),
         2: upgrade_dtu,
         3: check_upgrade_result,
         4: exit_process
     }
     try:
-        switch[index]()
+        switch[index](cursor)
     except Exception as err:
         print(err)
 
@@ -106,19 +125,35 @@ def show_menu():
             do_job(select_index)
 
 
+def connect_server(name):
+    cf = configparser.ConfigParser()
+    cf.read(name)
+    print("sections:", cf.sections())
+    db_config = {k: v for k, v in cf.items("db")}
+    db_config['port'] = int(db_config['port'])
+
+    con = pymysql.connect(**db_config)
+    return con
+
+
 if __name__ == "__main__":
 
     # 1.显示程序名称及版本信息
     Bar.show_head_info("DTU Remote Upgrade", "V1.00")
 
-    # 2. 显示用户操操作菜单
-    show_menu()
-
     # 3. 创建连接
-    con = pymysql.connect(**db_config)
+
+    # connection = connect_server()
 
     # 4. 创建游标
-    cursor = con.cursor()
+    # cursor = connection.cursor()
+
+    db_cfg, query_cfg = get_config_info('dbcfg.ini')
+    cursor = pymysql.connect(**db_cfg).cursor()
+    datalist = condb.selet_verion_datas(cursor, query_cfg["dtu_version"], query_cfg["query_key"])
+    upgrade_dtu(datalist)
+    # 2. 显示用户操操作菜单
+   # show_menu()
 
     # 5. select
-    condb.selet_verion_data(cursor, DTU_VERSION, ONLINE)
+    # condb.selet_verion_data(cursor, DTU_VERSION, ONLINE)
